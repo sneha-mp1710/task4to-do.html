@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart To-Do Web App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: #1e1e2f;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      padding: 20px;
+    }
+
+    .app {
+      background: #2a2a3c;
+      padding: 30px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 600px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #00e6a3;
+    }
+
+    .task-input {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .task-input input,
+    .task-input select,
+    .task-input input[type="datetime-local"] {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    .task-input button {
+      padding: 10px 20px;
+      background: #00e6a3;
+      border: none;
+      color: #000;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .filter {
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .filter select {
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    ul {
+      list-style: none;
+    }
+
+    li {
+      background: #3a3a4f;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    li.completed {
+      text-decoration: line-through;
+      color: #888;
+    }
+
+    .actions button {
+      margin-left: 10px;
+      background: transparent;
+      border: none;
+      color: #00e6a3;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <h1>Smart To-Do App</h1>
+    <div class="filter">
+      <select id="statusFilter" onchange="applyFilter()">
+        <option value="all">All</option>
+        <option value="completed">Completed</option>
+        <option value="pending">Pending</option>
+      </select>
+      <button onclick="clearAllTasks()">Clear All</button>
+    </div>
+    <div class="task-input">
+      <input type="text" id="task" placeholder="Enter a task">
+      <input type="datetime-local" id="due">
+      <button onclick="addTask()">Add</button>
+    </div>
+    <ul id="taskList"></ul>
+  </div>
+
+  <script>
+    let tasks = [];
+
+    function renderTasks() {
+      const taskList = document.getElementById("taskList");
+      taskList.innerHTML = "";
+      const filter = document.getElementById("statusFilter").value;
+      tasks.forEach((task, index) => {
+        if (filter === 'completed' && !task.completed) return;
+        if (filter === 'pending' && task.completed) return;
+
+        const li = document.createElement("li");
+        li.className = task.completed ? "completed" : "";
+        li.innerHTML = `
+          <span>
+            <strong>${task.text}</strong><br>
+            <small>${task.due ? "Due: " + task.due : ""}</small>
+          </span>
+          <div class="actions">
+            <button onclick="toggleComplete(${index})">✔</button>
+            <button onclick="editTask(${index})">✏️</button>
+            <button onclick="deleteTask(${index})">🗑</button>
+          </div>
+        `;
+        taskList.appendChild(li);
+      });
+    }
+
+    function addTask() {
+      const taskText = document.getElementById("task").value.trim();
+      const dueTime = document.getElementById("due").value;
+      if (!taskText) return;
+      tasks.push({ text: taskText, due: dueTime, completed: false });
+      document.getElementById("task").value = "";
+      document.getElementById("due").value = "";
+      renderTasks();
+    }
+
+    function toggleComplete(index) {
+      tasks[index].completed = !tasks[index].completed;
+      renderTasks();
+    }
+
+    function editTask(index) {
+      const newTask = prompt("Edit task:", tasks[index].text);
+      if (newTask) {
+        tasks[index].text = newTask;
+        renderTasks();
+      }
+    }
+
+    function deleteTask(index) {
+      tasks.splice(index, 1);
+      renderTasks();
+    }
+
+    function clearAllTasks() {
+      if (confirm("Are you sure you want to delete all tasks?")) {
+        tasks = [];
+        renderTasks();
+      }
+    }
+
+    function applyFilter() {
+      renderTasks();
+    }
+  </script>
+</body>
+
+</html>
